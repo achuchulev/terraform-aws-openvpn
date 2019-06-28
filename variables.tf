@@ -1,8 +1,10 @@
-variable "aws_region" {}
-
 variable "aws_access_key" {}
 
 variable "aws_secret_key" {}
+
+variable "aws_region" {
+  default = "us-east-1"
+}
 
 variable "openvpn_remote_client_user" {
   default = "client01"
@@ -13,7 +15,7 @@ variable "openvpn_remote_client_passwd" {
 }
 
 variable "subsidiary_network" {
-  default = "172.31.0.0/16"
+  default = "10.10.0.0/16"
 }
 
 variable "vpc_cidr_block" {
@@ -73,11 +75,11 @@ variable "subdomain_ttl" {
 }
 
 variable "ami" {
-  default = "ami-07a8d85046c8ecc99" // ubuntu xenial openvpn ami in us-east-1
+  default = "ami-005a7a7754837820c" // ubuntu xenial openvpn ami in us-east-1
 }
 
 variable "instance_type" {
-  default = "t2.medium"
+  default = "t2.micro"
 }
 
 variable "admin_user" {
