@@ -24,9 +24,6 @@ variable "subnet_cidr_block" {
   default = "10.0.0.0/16"
 }
 
-#variable "public_key" {}
-
-#variable "private_key" {}
 
 variable "ssh_user" {
   default = "openvpnas"
