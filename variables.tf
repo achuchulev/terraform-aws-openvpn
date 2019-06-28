@@ -76,7 +76,7 @@ variable "subdomain_ttl" {
 }
 
 variable "ami" {
-  default = "ami-07a8d85046c8ecc99" // ubuntu xenial openvpn ami in eu-west-1
+  default = "ami-07a8d85046c8ecc99" // ubuntu xenial openvpn ami in us-east-1
 }
 
 variable "instance_type" {
