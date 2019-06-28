@@ -150,7 +150,7 @@ reroute_dns=1
 USERDATA
 }
 
-resource "null_resource" "provision_openvpn" {
+resource "null_resource" "issue_certificates_openvpn" {
   triggers {
     subdomain_id = "${cloudflare_record.vpn.id}"
   }
@@ -172,6 +172,31 @@ resource "null_resource" "provision_openvpn" {
       "sudo ln -s -f /etc/letsencrypt/live/${var.cloudflare_subdomain}.${var.cloudflare_zone}/fullchain.pem /usr/local/openvpn_as/etc/web-ssl/server.crt",
       "sudo ln -s -f /etc/letsencrypt/live/${var.cloudflare_subdomain}.${var.cloudflare_zone}/privkey.pem /usr/local/openvpn_as/etc/web-ssl/server.key",
       "sudo service openvpnas start",
+    ]
+  }
+}
+
+resource "null_resource" "configure_openvpn" {
+  triggers {
+    aws_instance_id              = "${aws_instance.openvpn.id}"
+    subsidiary_network           = "${var.subsidiary_network}"
+    openvpn_remote_client_user   = "${var.openvpn_remote_client_user}"
+    openvpn_remote_client_passwd = "${var.openvpn_remote_client_passwd}"
+  }
+
+  depends_on = ["null_resource.issue_certificates_openvpn"]
+
+  connection {
+    type        = "ssh"
+    host        = "${aws_eip_association.vpn_eip_assoc.public_ip}"
+    user        = "${var.ssh_user}"
+    port        = "${var.ssh_port}"
+    private_key = "${file("~/.ssh/id_rsa")}"
+    agent       = false
+  }
+
+  provisioner "remote-exec" {
+    inline = [
       "sleep 15",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value route ConfigPut",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value ${var.subsidiary_network}  ConfigPut",
