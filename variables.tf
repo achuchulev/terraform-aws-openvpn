@@ -68,9 +68,6 @@ variable "udp_cidr" {
   default = "0.0.0.0/0"
 }
 
-#variable "route53_zone_name" {}
-#variable "subdomain_name" {}
-
 variable "subdomain_ttl" {
   default = "3600"
 }
@@ -90,8 +87,6 @@ variable "admin_user" {
 variable "admin_password" {
   default = "openvpn"
 }
-
-#variable "certificate_email" {}
 
 variable "cloudflare_email" {}
 variable "cloudflare_token" {}
