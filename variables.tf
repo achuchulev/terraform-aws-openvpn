@@ -6,18 +6,6 @@ variable "aws_region" {
   default = "us-east-1"
 }
 
-variable "openvpn_remote_client_user" {
-  default = "client01"
-}
-
-variable "openvpn_remote_client_passwd" {
-  default = "changemenow"
-}
-
-variable "subsidiary_network" {
-  default = "10.10.0.0/16"
-}
-
 variable "vpc_cidr_block" {
   default = "10.0.0.0/16"
 }

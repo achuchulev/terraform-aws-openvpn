@@ -31,12 +31,6 @@ resource "aws_route" "internet_access_openvpn" {
   gateway_id             = "${aws_internet_gateway.gw.id}"
 }
 
-resource "aws_route" "subsidiary_network_vpn_client" {
-  route_table_id         = "${aws_vpc.main.main_route_table_id}"
-  destination_cidr_block = "${var.subsidiary_network}"
-  instance_id            = "${aws_instance.openvpn.id}"
-}
-
 resource "aws_key_pair" "openvpn" {
   key_name   = "openvpn-key"
   public_key = "${file("~/.ssh/id_rsa.pub")}"
@@ -150,7 +144,8 @@ reroute_dns=1
 USERDATA
 }
 
-resource "null_resource" "issue_certificates_openvpn" {
+#Configur openvpn access server
+resource "null_resource" "configure_openvpn_access_server" {
   triggers {
     subdomain_id = "${cloudflare_record.vpn.id}"
   }
@@ -172,44 +167,11 @@ resource "null_resource" "issue_certificates_openvpn" {
       "sudo ln -s -f /etc/letsencrypt/live/${var.cloudflare_subdomain}.${var.cloudflare_zone}/fullchain.pem /usr/local/openvpn_as/etc/web-ssl/server.crt",
       "sudo ln -s -f /etc/letsencrypt/live/${var.cloudflare_subdomain}.${var.cloudflare_zone}/privkey.pem /usr/local/openvpn_as/etc/web-ssl/server.key",
       "sudo service openvpnas start",
-    ]
-  }
-}
-
-resource "null_resource" "configure_openvpn" {
-  triggers {
-    aws_instance_id              = "${aws_instance.openvpn.id}"
-    subsidiary_network           = "${var.subsidiary_network}"
-    openvpn_remote_client_user   = "${var.openvpn_remote_client_user}"
-    openvpn_remote_client_passwd = "${var.openvpn_remote_client_passwd}"
-  }
-
-  depends_on = ["null_resource.issue_certificates_openvpn"]
-
-  connection {
-    type        = "ssh"
-    host        = "${aws_eip_association.vpn_eip_assoc.public_ip}"
-    user        = "${var.ssh_user}"
-    port        = "${var.ssh_port}"
-    private_key = "${file("~/.ssh/id_rsa")}"
-    agent       = false
-  }
-
-  provisioner "remote-exec" {
-    inline = [
       "sleep 15",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value route ConfigPut",
-      "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value ${var.subsidiary_network}  ConfigPut",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.inter_client --value true ConfigPut",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.reroute_dns --value false ConfigPut",
-      "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.reroute_gw --value false ConfigPut",
-      "sudo /usr/local/openvpn_as/scripts/sacli --user ${var.openvpn_remote_client_user} --key type --value user_compile UserPropPut",
-      "sudo /usr/local/openvpn_as/scripts/sacli --user ${var.openvpn_remote_client_user} --new_pass ${var.openvpn_remote_client_passwd} SetLocalPassword",
-      "sudo /usr/local/openvpn_as/scripts/sacli --user ${var.openvpn_remote_client_user} --key c2s_route.0 --value ${var.subsidiary_network} UserPropPut",
-      "sudo /usr/local/openvpn_as/scripts/sacli --user ${var.openvpn_remote_client_user} --key prop_autologin --value true UserPropPut",
-      "sudo /usr/local/openvpn_as/scripts/sacli --user ${var.openvpn_remote_client_user} AutoGenerateOnBehalfOf",
-      "sudo /usr/local/openvpn_as/scripts/sacli --user ${var.openvpn_remote_client_user} GetAutologin >client.ovpn",
-      "sudo service openvpnas restart",
+      "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.reroute_gw --value false ConfigPut"
     ]
   }
 }
