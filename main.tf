@@ -31,6 +31,13 @@ resource "aws_route" "internet_access_openvpn" {
   gateway_id             = "${aws_internet_gateway.gw.id}"
 }
 
+resource "aws_route" "subsidiary_network_route_add" {
+  count                  = "${length(var.vpn_gw_subsidiary_network_cidr)}"
+  route_table_id         = "${aws_vpc.main.main_route_table_id}"
+  destination_cidr_block = "${var.vpn_gw_subsidiary_network_cidr[count.index]}"
+  instance_id            = "${aws_instance.openvpn.id}"
+}
+
 resource "aws_key_pair" "openvpn" {
   key_name   = "openvpn-key"
   public_key = "${file("~/.ssh/id_rsa.pub")}"

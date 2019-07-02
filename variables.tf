@@ -14,6 +14,10 @@ variable "subnet_cidr_block" {
   default = "10.0.0.0/16"
 }
 
+variable "vpn_gw_subsidiary_network_cidr" {
+  type = "list"
+}
+
 variable "ssh_user" {
   default = "openvpnas"
 }
