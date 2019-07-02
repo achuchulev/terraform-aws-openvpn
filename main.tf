@@ -179,6 +179,7 @@ resource "null_resource" "configure_openvpn_access_server" {
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.inter_client --value true ConfigPut",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.reroute_dns --value false ConfigPut",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.reroute_gw --value false ConfigPut",
+      "crontab <<EOF 0 12 * * * /usr/bin/certbot renew --quiet EOF"
     ]
   }
 }
