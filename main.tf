@@ -174,7 +174,7 @@ resource "null_resource" "configure_openvpn_access_server" {
       "sudo ln -s -f /etc/letsencrypt/live/${var.cloudflare_subdomain}.${var.cloudflare_zone}/fullchain.pem /usr/local/openvpn_as/etc/web-ssl/server.crt",
       "sudo ln -s -f /etc/letsencrypt/live/${var.cloudflare_subdomain}.${var.cloudflare_zone}/privkey.pem /usr/local/openvpn_as/etc/web-ssl/server.key",
       "sudo service openvpnas start",
-      "sleep 15",
+      "sleep 30",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value route ConfigPut",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.inter_client --value true ConfigPut",
       "sudo /usr/local/openvpn_as/scripts/sacli --key vpn.client.routing.reroute_dns --value false ConfigPut",
